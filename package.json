@@ -1,0 +1,17 @@
+{
+  "name": "secure-random-token",
+  "version": "1.0.0",
+  "description": "Example NodeJS implementation of word-based security tokens generator, inspired by Notion",
+  "main": "index.js",
+  "scripts": {
+    "dictionary": "node index.js --dictionary",
+    "token": "node index.js --token"
+  },
+  "author": "Matúš Makatura",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "line-reader": "^0.4.0",
+    "minimist": "^1.2.5",
+    "prompt-sync": "^4.2.0"
+  }
+}
