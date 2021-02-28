@@ -1,5 +1,11 @@
 const fs = require('fs');
 const prompt = require('prompt-sync')();
+
+/**
+ * Current command arguments from the console
+ */
+const argv = require('minimist')(process.argv.slice(2));
+
 const dictionaryGenerator = require('./dictionary-generator');
 const tokenGenerator = require('./token-generator');
 
@@ -8,13 +14,13 @@ const tokenGenerator = require('./token-generator');
  */
 const maxAttempts = 5;
 /**
+ * Maximum amount of seconds before verification code expires
+ */
+const expirationTime = 60 * 1000;
+/**
  * Destination of passphrase dump for debug purposes
  */
 const dumpFileName = 'passphrase_dump.txt';
-/**
- * Current command arguments from the console
- */
-const argv = require('minimist')(process.argv.slice(2));
 
 /**
  * Dumps passphrase, secret & salt into temporary file.
@@ -40,19 +46,36 @@ if (argv.dictionary) {
    * Humans do mistakes, so we allow several attempts
    * to enter the code.
    */
-  var attemptCounts = 0;
-  while (true) {
+  let attemptCounts = 0;
+  /**
+   * Token will expire when token timer reaches
+   * the max alloted time, in milliseconds.
+   */
+  let tokenTimer = 0;
+  /**
+   * Creates an object which calls checkFunction once
+   * a second. Is terminated with clearInterval(timerInterval);
+   */
+  const timerInterval = setInterval(checkToken, 1000);
+
+  function checkToken() {
     const attempt = prompt('Please enter token: ').trim();
 
     if (tokenGenerator.verify(attempt, tokenBundle.secret, tokenBundle.salt)) {
       console.log('Token has been successfully verified');
-      break;
+      clearInterval(timerInterval);
     }
 
-    attemptCounts++;
+    attemptCounts += 1;
     if (attemptCounts >= maxAttempts) {
       console.log('Verification failed! Too many attempts!');
-      break;
+      clearInterval(timerInterval);
+    }
+
+    tokenTimer += 1;
+    if (tokenTimer >= expirationTime) {
+      console.log('Time expired! Please get a new code.');
+      clearInterval(timerInterval);
     }
 
     const remainingAttempts = maxAttempts - attemptCounts;
