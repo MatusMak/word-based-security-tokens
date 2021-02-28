@@ -8,6 +8,10 @@ const tokenGenerator = require('./token-generator');
  */
 const maxAttempts = 5;
 /**
+ * Maximum amount of seconds before verification code expires
+ */
+const expirationTime = 60 * 1000;
+/**
  * Destination of passphrase dump for debug purposes
  */
 const dumpFileName = 'passphrase_dump.txt';
@@ -41,18 +45,27 @@ if (argv.dictionary) {
    * to enter the code.
    */
   var attemptCounts = 0;
-  while (true) {
+  var tokenTimer
+  var timerInterval = setInterval(check_token, 1000);
+
+  function check_token() {
     const attempt = prompt('Please enter token: ').trim();
 
     if (tokenGenerator.verify(attempt, tokenBundle.secret, tokenBundle.salt)) {
       console.log('Token has been successfully verified');
-      break;
-    }
+      clearInterval(timerInterval);
+      }
 
     attemptCounts++;
     if (attemptCounts >= maxAttempts) {
       console.log('Verification failed! Too many attempts!');
-      break;
+      clearInterval(timerInterval);
+      }
+
+    tokenTimer += 1000;
+    if (tokenTimer >= expirationTime) {
+      console.log('Time expired! Please get a new code.');
+      clearInterval(timerInterval);
     }
 
     const remainingAttempts = maxAttempts - attemptCounts;
