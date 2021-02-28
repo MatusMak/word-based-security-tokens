@@ -49,7 +49,7 @@ if (argv.dictionary) {
   let attemptCounts = 0;
   /**
    * Token will expire when token timer reaches
-   * the max alloted time, in milliseconds.
+   * the max alloted time, in seconds.
    */
   let tokenTimer = 0;
   /**
