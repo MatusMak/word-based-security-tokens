@@ -16,7 +16,7 @@ const maxAttempts = 5;
 /**
  * Maximum amount of seconds before verification code expires
  */
-const expirationTime = 60 * 1000;
+const expirationTime = 60;
 /**
  * Destination of passphrase dump for debug purposes
  */
